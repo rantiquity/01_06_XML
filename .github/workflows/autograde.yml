@@ -1,33 +1,74 @@
-name: Autograde R Assignment
+name: Autograde R
 
-on: [push, pull_request]
+on: 
+  push:
+
+permissions: 
+  contents: read
 
 jobs:
-  test:
+  grade:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout student code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         
-      - name: Checkout private tests
-        uses: actions/checkout@v3
+      - name: Fetch private tests
+        uses: actions/checkout@v5
         with:
-          repository: r-classes-2025/xml-grading-tests
-          token: ${{ secrets.TEST_REPO_TOKEN }}  
-          path: private-tests
+          repository: rantiquity/01_06_XML_Tests
+          token: ${{ secrets.TESTS_DOWNLOAD_TOKEN }}  
+          path: hidden_tests_dir
           
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
         
-      - name: Install R package dependencies
+      - name: Install R dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-         extra-packages: |
-          dplyr
-          purrr
-          xml2
-          testthat
+         packages: |
+          any::dplyr
+          any::purrr
+          any::xml2
+          any::testthat
+         cache-version: ${{ hashFiles('hidden_tests_dir/test_hidden.R') }}
+         dependencies: '"hard"'
+         install-pandoc: false
+         install-quarto: false
           
-      - name: Run tests
-        run: Rscript private-tests/run_tests.R
+      - name: Run hidden tests
+        run: |
+          results <- testthat::test_file(
+            "hidden_tests_dir/test_hidden.R",
+            reporter = "summary"
+          )
+
+          results_df <- as.data.frame(results)
+
+          failed <- sum(results_df$failed, na.rm = TRUE)
+          errors <- sum(results_df$error, na.rm = TRUE)
+          warnings <- sum(results_df$warning, na.rm = TRUE)
+          skipped <- sum(results_df$skipped, na.rm = TRUE)
+          passed <- sum(results_df$passed, na.rm = TRUE)
+
+          cat("\n")
+          cat("=====================================\n")
+          cat(sprintf(
+            "[ PASS %d | FAIL %d | ERROR %d | WARN %d | SKIP %d ]\n",
+               passed, failed, errors, warnings, skipped
+             ))
+             
+          if (failed == 0 && errors == 0) {
+            cat("🎉 Отлично! Все проверки успешно пройдены.\n")
+          } else {
+            cat("❌ Некоторые проверки не пройдены.\n")
+            cat("Прокрутите журнал выше — там указано, какие именно проверки завершились ошибкой.\n")
+            
+            quit(status = 1)
+          }
+
+          cat("=====================================\n")
     
