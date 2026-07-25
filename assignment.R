@@ -14,7 +14,9 @@ library(xml2)
 library(dplyr)
 library(purrr)
  
-unzip("letters.zip")
+if (!dir.exists("letters")) {
+  unzip("letters.zip")
+}
 
 my_xmls <- list.files("letters/", full.names = TRUE)
 
