@@ -10,7 +10,7 @@
 
 # Применяйте trimws() к результату парсинга, чтобы избавиться от лишних строк. 
 
-library(xml2) 
+library(xml2)  
 library(dplyr)
 library(purrr)
  
