@@ -1,44 +1,64 @@
 name: Autograde R
 
-on: 
+on:
   push:
 
-permissions: 
+permissions:
   contents: read
 
 jobs:
   grade:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout student code
         uses: actions/checkout@v5
-        
+
       - name: Fetch private tests
         uses: actions/checkout@v5
         with:
           repository: rantiquity/01_06_XML_Tests
-          token: ${{ secrets.TESTS_DOWNLOAD_TOKEN }}  
+          token: ${{ secrets.TESTS_DOWNLOAD_TOKEN }}
           path: hidden_tests_dir
-          
+
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
           use-public-rspm: true
-        
+
       - name: Install R dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-         packages: |
-          any::dplyr
-          any::purrr
-          any::xml2
-          any::testthat
-         cache-version: ${{ hashFiles('hidden_tests_dir/test-hidden.R') }}
-         dependencies: '"hard"'
-         install-pandoc: false
-         install-quarto: false
-          
+          packages: |
+            any::dplyr
+            any::purrr
+            any::xml2
+            any::testthat
+          cache-version: ${{ hashFiles('hidden_tests_dir/test-hidden.R') }}
+          dependencies: '"hard"'
+          install-pandoc: false
+          install-quarto: false
+
+      - name: Prepare files for hidden tests
+        shell: bash
+        run: |
+          if [ ! -f "assignment.R" ]; then
+            echo "❌ Не найден файл assignment.R"
+            exit 1
+          fi
+
+          if [ ! -f "letters.zip" ]; then
+            echo "❌ Не найден архив letters.zip"
+            exit 1
+          fi
+
+          cp assignment.R hidden_tests_dir/assignment.R
+          cp letters.zip hidden_tests_dir/letters.zip
+
+          echo "Файлы, доступные скрытым тестам:"
+          ls -la hidden_tests_dir
+
       - name: Run hidden tests
         shell: Rscript {0}
         run: |
@@ -57,19 +77,29 @@ jobs:
 
           cat("\n")
           cat("=====================================\n")
-          cat(sprintf(
-            "[ PASS %d | FAIL %d | ERROR %d | WARN %d | SKIP %d ]\n",
-               passed, failed, errors, warnings, skipped
-             ))
-             
+          cat(
+            sprintf(
+              "[ PASS %d | FAIL %d | ERROR %d | WARN %d | SKIP %d ]\n",
+              passed,
+              failed,
+              errors,
+              warnings,
+              skipped
+            )
+          )
+
           if (failed == 0 && errors == 0) {
             cat("🎉 Отлично! Все проверки успешно пройдены.\n")
           } else {
             cat("❌ Некоторые проверки не пройдены.\n")
-            cat("Прокрутите журнал выше — там указано, какие именно проверки завершились ошибкой.\n")
-            
+            cat(
+              paste0(
+                "Прокрутите журнал выше — там указано, ",
+                "какие именно проверки завершились ошибкой.\n"
+              )
+            )
+
             quit(status = 1)
           }
 
           cat("=====================================\n")
-    
