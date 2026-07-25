@@ -18,51 +18,28 @@ if (!dir.exists("letters")) {
   unzip("letters.zip")
 }
 
-my_xmls <- list.files("letters/", full.names = TRUE)
+my_xmls <- # ваш код здесь 
 
 # пишем код для одного письма
 test_xml <- my_xmls[1]
-doc <- read_xml(test_xml)
-ns <- xml_ns(doc)
+doc <- # ваш код здесь 
+ns <- # ваш код здесь 
 
 # дата письма
-date <- xml_find_first(doc, "//d1:correspAction[@type='sending']//d1:date", ns) |> 
-  xml_attr("when") 
-
-
+date <- # ваш код здесь 
 
 # адресат письма
-corresp <- xml_find_first(doc, "//d1:correspAction[@type='receiving']//d1:persName", ns) |> 
-  xml_text() |> 
-  trimws()
-
-
+corresp <- # ваш код здесь 
 
 # том 
 
-vol <- xml_find_first(doc, "//d1:biblScope[@unit='vol']", ns) |> 
-  xml_text() |> 
-  trimws()
-
+vol <- # ваш код здесь 
 
 ### ---------------------------###
 ## теперь оборачиваем в функцию
 read_letter <- function(xml_path) {
-  doc <- read_xml(xml_path)
-  ns <- xml_ns(doc)
-  
-  # дата письма
-  date <- xml_find_first(doc, "//d1:correspAction[@type='sending']//d1:date", ns) |> 
-    xml_attr("when") 
-  
-  # адресат письма
-  corresp <- xml_find_first(doc, "//d1:correspAction[@type='receiving']//d1:persName", ns) |> 
-    xml_text() |> 
-    trimws()
-  
-  vol <- xml_find_first(doc, "//d1:biblScope[@unit='vol']", ns) |> 
-    xml_text() |> 
-    trimws()
+
+  # ваш код здесь 
   
   # записываем в тиббл
   res <- tibble(
