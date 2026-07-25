@@ -34,7 +34,7 @@ jobs:
           any::purrr
           any::xml2
           any::testthat
-         cache-version: ${{ hashFiles('hidden_tests_dir/test_hidden.R') }}
+         cache-version: ${{ hashFiles('hidden_tests_dir/test-hidden.R') }}
          dependencies: '"hard"'
          install-pandoc: false
          install-quarto: false
@@ -43,7 +43,7 @@ jobs:
         shell: Rscript {0}
         run: |
           results <- testthat::test_file(
-            "hidden_tests_dir/test_hidden.R",
+            "hidden_tests_dir/test-hidden.R",
             reporter = "summary"
           )
 
