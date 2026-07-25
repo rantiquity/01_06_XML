@@ -64,7 +64,7 @@ read_letter <- function(xml_path) {
   
   # записываем в тиббл
   res <- tibble(
-    date = date,
+    date = date, 
     corresp = corresp,
     vol = vol
   )
